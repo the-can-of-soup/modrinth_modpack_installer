@@ -9,6 +9,13 @@ import os
 
 FILENAME_UNSAFE_CHARACTERS: str = r'\/:*?"<>|'
 ALLOWED_HOSTNAMES: list[str] = ['cdn.modrinth.com', 'github.com', 'raw.githubusercontent.com', 'gitlab.com']
+DEPENDENCY_NAMES: dict[str, str] = {
+    'minecraft': 'Minecraft',
+    'forge': 'Forge',
+    'neoforge': 'NeoForge',
+    'fabric-loader': 'Fabric',
+    'quilt-loader': 'Quilt'
+}
 
 class ModpackExtractorError(Exception):
     pass
@@ -26,7 +33,7 @@ def escape_filename(filename: str) -> str:
 
     return escaped_filename
 
-def extract_modpack(filename: str, destination_folder: str = '.', is_server: bool = False, download_optional_files: bool = True, print_logs: bool = True) -> None:
+def extract_modpack(filename: str, destination_folder: str = '.', is_server: bool = False, download_optional_files: bool = True, wait_for_user: bool = True, print_logs: bool = True) -> None:
 
     # Read mrpack file
     if print_logs:
@@ -67,6 +74,22 @@ def extract_modpack(filename: str, destination_folder: str = '.', is_server: boo
     modpack_summary: str | None = data.get('summary')
     modpack_dependencies: dict[str, str] = data['dependencies']
     downloads_metadata: list[dict] = data['files']
+
+    # Wait for user
+    if wait_for_user:
+        if print_logs:
+            print('')
+        print(f'Modpack name:    {modpack_name}')
+        print(f'Modpack version: {modpack_version}')
+        if modpack_summary is not None:
+            print(f'Modpack summary: {modpack_summary.replace('\n', '\n                 ')}')
+        print('Dependencies:')
+        for dependency, dependency_version in modpack_dependencies.items():
+            print(f'    {DEPENDENCY_NAMES[dependency]} {dependency_version}')
+        print('')
+        input('Press ENTER to continue.')
+        if print_logs:
+            print('')
 
     # Download files
     if print_logs:
