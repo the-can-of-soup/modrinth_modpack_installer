@@ -86,6 +86,8 @@ def extract_modpack(filename: str, destination_folder: str = '.', is_server: boo
         should_download: bool = False
         if (file_support == 'required') or (file_support == 'optional' and download_optional_files):
             should_download = True
+        if not should_download:
+            continue
 
         # Download file
         if print_logs:
