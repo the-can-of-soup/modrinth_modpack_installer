@@ -1,3 +1,5 @@
+# TODO: Download mods
+
 from zipfile import ZipFile
 import json
 import os
