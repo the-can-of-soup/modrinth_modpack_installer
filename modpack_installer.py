@@ -298,11 +298,12 @@ def install_modpack(extracted_modpack_filename: str, data: dict, wait_for_user: 
     print('')
     input('Press ENTER once complete.')
     print('')
+    print('Go to your ".minecraft" folder, then go to "versions". Find the name of the folder that corresponds to the version meeting the above requirements.')
 
     # Get installation version from user
     profile_version: str
     while True:
-        profile_version = input('Please enter the exact name of the version: ')
+        profile_version = input('Enter the exact name of the version folder: ')
 
         if profile_version.strip() == '':
             raise ModpackInstallerError('User cancelled installation.')
