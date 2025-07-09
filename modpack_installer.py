@@ -1,16 +1,19 @@
-# TODO: Ensure compatibility with older Python 3 versions
-
 # Documentation used: https://support.modrinth.com/en/articles/8802351-modrinth-modpack-format-mrpack
 
 from urllib.parse import urlparse
 from zipfile import ZipFile
+from typing import Optional
 import requests
 import datetime
+import platform
 import hashlib
 import base64
 import random
 import json
 import os
+
+if platform.system() != 'Windows':
+    raise OSError('Soup\'s Modrinth modpack installer only works on Windows operating systems!')
 
 APPDATA_PATH: str = os.path.expandvars('%appdata%')
 INSTALLATIONS_DIR: str = os.path.join(APPDATA_PATH, '.soup_mc_modrinth_packs')
@@ -113,7 +116,7 @@ def extract_modpack(filename: str, destination_folder: str = '.', is_server: boo
     # Get metadata
     modpack_version: str = data['versionId']
     modpack_name: str = data['name']
-    modpack_summary: str | None = data.get('summary')
+    modpack_summary: Optional[str] = data.get('summary')
     modpack_dependencies: dict[str, str] = data['dependencies']
     downloads_metadata: list[dict] = data['files']
 
@@ -124,7 +127,8 @@ def extract_modpack(filename: str, destination_folder: str = '.', is_server: boo
         print(f'Modpack name:    {modpack_name}')
         print(f'Modpack version: {modpack_version}')
         if modpack_summary is not None:
-            print(f'Modpack summary: {modpack_summary.replace('\n', '\n                 ')}')
+            indented_modpack_summary: str = modpack_summary.replace('\n', '\n                 ')
+            print(f'Modpack summary: {indented_modpack_summary}')
         print('Dependencies:')
         for dependency, dependency_version in modpack_dependencies.items():
             print(f'    {DEPENDENCY_NAMES.get(dependency, dependency)} {dependency_version}')
@@ -236,9 +240,9 @@ def install_modpack(extracted_modpack_filename: str, data: dict, wait_for_user: 
     """
 
     # Get installation path and name
-    escaped_output_name: str = escape_filename(f'{data['name']}_{data['versionId']}', strict=True)
+    escaped_output_name: str = escape_filename(f'{data["name"]}_{data["versionId"]}', strict=True)
     install_path: str = os.path.join(INSTALLATIONS_DIR, escaped_output_name)
-    profile_name: str = f'{data['name']} - {data['versionId']}'
+    profile_name: str = f'{data["name"]} - {data["versionId"]}'
 
     # Check for existing installation
     already_installed: bool = os.path.isdir(install_path)
@@ -256,9 +260,9 @@ def install_modpack(extracted_modpack_filename: str, data: dict, wait_for_user: 
     if already_installed:
         installation_number: int = 2
         while os.path.isdir(install_path):
-            escaped_output_name = escape_filename(f'{data['name']}_{data['versionId']}_{installation_number}', strict=True)
+            escaped_output_name = escape_filename(f'{data["name"]}_{data["versionId"]}_{installation_number}', strict=True)
             install_path = os.path.join(INSTALLATIONS_DIR, escaped_output_name)
-        profile_name = f'{data['name']} - {data['versionId']} (#{installation_number})'
+        profile_name = f'{data["name"]} - {data["versionId"]} (#{installation_number})'
 
     # Get the icon URI
     if print_logs:
