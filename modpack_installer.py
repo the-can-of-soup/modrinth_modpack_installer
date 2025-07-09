@@ -1,5 +1,4 @@
 # TODO: Ensure compatibility with older Python 3 versions
-# TODO: Finish other TODOs below this point in the code
 
 # Documentation used: https://support.modrinth.com/en/articles/8802351-modrinth-modpack-format-mrpack
 
