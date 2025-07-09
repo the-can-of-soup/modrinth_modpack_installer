@@ -113,6 +113,7 @@ def select_file(directory: str, file_extension: Optional[str] = None) -> Optiona
     return path
 
 def catch_errors(function: Callable, *args) -> bool:
+    # noinspection PyBroadException,PyShadowingNames
     try:
         function(*args)
     except modpack_installer.ModpackExtractorError as error:
@@ -147,7 +148,7 @@ def extract(filename: str, is_server: bool, do_optional: bool) -> None:
 
 # MAIN
 
-if __name__ == '__main__':
+def main() -> None:
     # Create folders
     if not os.path.isdir(MODPACKS_DIR):
         os.mkdir(MODPACKS_DIR)
@@ -231,3 +232,6 @@ if __name__ == '__main__':
             print('Invalid action!')
             print('')
             input('Press ENTER to continue.')
+
+if __name__ == '__main__':
+    main()
