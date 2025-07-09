@@ -55,19 +55,17 @@ def escape_filename(filename: str, strict: bool = False) -> str:
 
     return escaped_filename
 
-def image_to_uri(filename: str) -> str:
-    with open(filename, 'rb') as f:
-        data: bytes = f.read()
-    encoded_data: str = base64.b64encode(data).decode()
+def image_to_uri(image_data: bytes) -> str:
+    encoded_data: str = base64.b64encode(image_data).decode()
     return f'data:image/png;base64,{encoded_data}'
 
-def extract_modpack(filename: str, destination_folder: str = '.', is_server: bool = False, download_optional_files: bool = True, wait_for_user: bool = True, print_logs: bool = True) -> tuple[str, str, dict]:
+def extract_modpack(filename: str, destination_folder: str = '.', is_server: bool = False, download_optional_files: bool = True, wait_for_user: bool = True, print_logs: bool = True) -> tuple[str, dict]:
     """
-    Converts an .mrpack file into a .zip file and then extracts it.
+    Converts an .mrpack file into a .zip file.
 
     :param filename: The path to the .mrpack file.
     :type filename: str
-    :param destination_folder: The folder to place the output .zip file and extracted folder into.
+    :param destination_folder: The folder to place the output .zip file into.
     :type destination_folder: str
     :param is_server: Whether the modpack is being extracted for a server.
     :type is_server: bool
@@ -77,8 +75,8 @@ def extract_modpack(filename: str, destination_folder: str = '.', is_server: boo
     :type wait_for_user: bool
     :param print_logs: Whether to print logs while extracting.
     :type print_logs: bool
-    :return: The path to the extracted modpack directory, the path to the .zip file, and the contents of the modpack index file as a dict.
-    :rtype: tuple[str, str, dict]
+    :return: The path to the .zip file, and the contents of the modpack index file as a dict.
+    :rtype: tuple[str, dict]
     """
 
     # Read mrpack file
@@ -201,15 +199,12 @@ def extract_modpack(filename: str, destination_folder: str = '.', is_server: boo
 
     # Get output paths
     escaped_output_name: str = escape_filename(f'{modpack_name} - {modpack_version}')
-    output_path: str = os.path.join(destination_folder, escaped_output_name)
-    compressed_output_filename: str = output_path + ' (Compressed).zip'
-    if os.path.isdir(output_path):
-        raise ModpackExtractorError(f'The folder "{output_path}" already exists! Please remove it first.')
+    output_filename: str = os.path.join(destination_folder, escaped_output_name + '.zip')
 
     # Write output zip file
     if print_logs:
         print('Writing output zip file...')
-    with ZipFile(compressed_output_filename, 'w') as zf:
+    with ZipFile(output_filename, 'w') as zf:
 
         # Write downloaded files
         for compressed_filename, file_data in downloaded_files.items():
@@ -219,26 +214,20 @@ def extract_modpack(filename: str, destination_folder: str = '.', is_server: boo
         for compressed_filename, file_data in overrides.items():
             zf.writestr(compressed_filename, file_data)
 
-    # Extract output zip file
-    if print_logs:
-        print('Extracting output zip file...')
-    with ZipFile(compressed_output_filename, 'r') as zf:
-        zf.extractall(output_path)
-
     # Show success message
     if print_logs:
-        print(f'Successfully extracted to "{output_path}"!')
+        print(f'Successfully extracted to "{output_filename}"!')
 
     # Return info
-    return output_path, compressed_output_filename, data
+    return output_filename, data
 
-def install_modpack(extracted_modpack_path: str, data: dict, wait_for_user: bool = True, print_logs: bool = True) -> None:
+def install_modpack(extracted_modpack_filename: str, data: dict, wait_for_user: bool = True, print_logs: bool = True) -> None:
     """
     Creates an installation in the Minecraft Launcher from an extracted modpack.
     Prompts the user for the name of the Minecraft version to use.
 
-    :param extracted_modpack_path: The path to the folder containing the extracted modpack.
-    :type extracted_modpack_path: str
+    :param extracted_modpack_filename: The path to the .zip file containing the extracted modpack.
+    :type extracted_modpack_filename: str
     :param data: The contents of the modpack index file as a dict.
     :type data: dict
     :param wait_for_user: Whether to ask user to confirm before installing if a duplicate installation is found.
@@ -276,10 +265,11 @@ def install_modpack(extracted_modpack_path: str, data: dict, wait_for_user: bool
     # Get the icon URI
     if print_logs:
         print('Loading icon...')
-    icon_path: str = os.path.join(extracted_modpack_path, 'icon.png')
     profile_icon: str = DEFAULT_PROFILE_ICON
-    if os.path.isfile(icon_path):
-        profile_icon = image_to_uri(icon_path)
+    with ZipFile(extracted_modpack_filename, 'r') as zf:
+        if 'icon.png' in zf.namelist():
+            icon_data: bytes = zf.read('icon.png')
+            profile_icon = image_to_uri(icon_data)
 
     # Show version selection instructions
     if print_logs:
@@ -336,7 +326,8 @@ def install_modpack(extracted_modpack_path: str, data: dict, wait_for_user: bool
     # Install modpack
     if print_logs:
         print('Installing...')
-    shutil.copytree(extracted_modpack_path, install_path)
+    with ZipFile(extracted_modpack_filename, 'r') as zf:
+        zf.extractall(install_path)
 
     # Save launcher profile
     if print_logs:
@@ -353,6 +344,6 @@ def install_modpack(extracted_modpack_path: str, data: dict, wait_for_user: bool
 
 if __name__ == '__main__':
     # Testing
-    output_path, compressed_output_filename, data = extract_modpack('modpacks/test.mrpack', 'extracted_modpacks')
-    install_modpack(output_path, data)
+    filename, modpack_data = extract_modpack('modpacks/test.mrpack', 'extracted_modpacks')
+    install_modpack(filename, modpack_data)
     input('')
