@@ -96,6 +96,7 @@ def print_modpack_info(filename: str) -> None:
     modpack_dependencies: dict[str, str] = data['dependencies']
 
     # Print info
+    print(f'Filename:        {os.path.basename(filename)}')
     print(f'Modpack name:    {modpack_name}')
     print(f'Modpack version: {modpack_version}')
     if modpack_summary is not None:
