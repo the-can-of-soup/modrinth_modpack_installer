@@ -3,6 +3,7 @@
 from urllib.parse import urlparse
 from zipfile import ZipFile
 from typing import Optional
+from PIL import Image
 import requests
 import datetime
 import platform
@@ -11,6 +12,7 @@ import base64
 import random
 import json
 import os
+import io
 
 if platform.system() != 'Windows':
     raise OSError('Soup\'s Modrinth modpack installer only works on Windows operating systems!')
@@ -19,6 +21,7 @@ APPDATA_PATH: str = os.path.expandvars('%appdata%')
 INSTALLATIONS_DIR: str = os.path.join(APPDATA_PATH, '.soup_mc_modrinth_packs')
 VERSIONS_DIR: str = os.path.join(APPDATA_PATH, '.minecraft', 'versions')
 LAUNCHER_PROFILES_FILE_PATH: str = os.path.join(APPDATA_PATH, '.minecraft', 'launcher_profiles.json')
+PROFILE_ICON_SIZE: tuple[int, int] = (128, 128)
 FILENAME_UNSAFE_CHARACTERS: str = r'\/:*?"<>|'
 STRICT_FILENAME_ALLOWED_CHARACTERS: str = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-'
 ALLOWED_HOSTNAMES: list[str] = ['cdn.modrinth.com', 'github.com', 'raw.githubusercontent.com', 'gitlab.com']
@@ -272,7 +275,18 @@ def install_modpack(extracted_modpack_filename: str, data: dict, wait_for_user: 
     profile_icon: str = DEFAULT_PROFILE_ICON
     with ZipFile(extracted_modpack_filename, 'r') as zf:
         if 'icon.png' in zf.namelist():
-            icon_data: bytes = zf.read('icon.png')
+            original_icon_data: bytes = zf.read('icon.png')
+
+            # Resize icon
+            if print_logs:
+                print('Resizing icon...')
+            original_icon_stream: io.BytesIO = io.BytesIO(original_icon_data)
+            icon_stream: io.BytesIO = io.BytesIO()
+            icon: Image = Image.open(original_icon_stream)
+            icon = icon.resize(PROFILE_ICON_SIZE, Image.Resampling.BOX)
+            icon.save(icon_stream, format='PNG')
+            icon_data: bytes = icon_stream.getvalue()
+
             profile_icon = image_to_uri(icon_data)
 
     # Show version selection instructions
