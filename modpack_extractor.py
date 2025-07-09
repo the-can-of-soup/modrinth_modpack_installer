@@ -8,7 +8,6 @@ from zipfile import ZipFile
 import requests
 import datetime
 import hashlib
-import shutil
 import base64
 import random
 import json
