@@ -63,6 +63,38 @@ def image_to_uri(image_data: bytes) -> str:
     encoded_data: str = base64.b64encode(image_data).decode()
     return f'data:image/png;base64,{encoded_data}'
 
+def print_modpack_info(filename: str) -> None:
+    """
+    Prints info about an .mrpack file.
+
+    :param filename: The path to the .mrpack file.
+    :type filename: str
+    :rtype: None
+    """
+
+    # Read mrpack file
+    with ZipFile(filename, 'r') as zf:
+
+        # Read index file
+        data: bytes = zf.read('modrinth.index.json')
+        data: dict = json.loads(data.decode())
+
+    # Get metadata
+    modpack_version: str = data['versionId']
+    modpack_name: str = data['name']
+    modpack_summary: Optional[str] = data.get('summary')
+    modpack_dependencies: dict[str, str] = data['dependencies']
+
+    # Print info
+    print(f'Modpack name:    {modpack_name}')
+    print(f'Modpack version: {modpack_version}')
+    if modpack_summary is not None:
+        indented_modpack_summary: str = modpack_summary.replace('\n', '\n                 ')
+        print(f'Modpack summary: {indented_modpack_summary}')
+    print('Dependencies:')
+    for dependency, dependency_version in modpack_dependencies.items():
+        print(f'    {DEPENDENCY_NAMES.get(dependency, dependency)} {dependency_version}')
+
 def extract_modpack(filename: str, destination_folder: str = '.', is_server: bool = False, download_optional_files: bool = True, wait_for_user: bool = True, print_logs: bool = True) -> tuple[str, dict]:
     """
     Converts an .mrpack file into a .zip file.
