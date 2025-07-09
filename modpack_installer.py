@@ -1,5 +1,7 @@
 # Documentation used: https://support.modrinth.com/en/articles/8802351-modrinth-modpack-format-mrpack
 
+# IMPORTS
+
 from urllib.parse import urlparse
 from zipfile import ZipFile
 from typing import Optional
@@ -16,6 +18,10 @@ import io
 
 if platform.system() != 'Windows':
     raise OSError('Soup\'s Modrinth modpack installer only works on Windows operating systems!')
+
+
+
+# CONSTANTS
 
 APPDATA_PATH: str = os.path.expandvars('%appdata%')
 INSTALLATIONS_DIR: str = os.path.join(APPDATA_PATH, '.soup_mc_modrinth_packs')
@@ -34,6 +40,10 @@ DEPENDENCY_NAMES: dict[str, str] = {
     'fabric-loader': 'Fabric',
     'quilt-loader': 'Quilt'
 }
+
+
+
+# DEFINITIONS
 
 class ModpackExtractorError(Exception):
     pass
@@ -393,8 +403,13 @@ def install_modpack(extracted_modpack_filename: str, data: dict, wait_for_user: 
     if print_logs:
         print(f'Successfully installed as "{profile_name}"!')
 
+
+
+# MAIN
+
 if __name__ == '__main__':
-    # Testing
-    filename, modpack_data = extract_modpack('modpacks/test.mrpack', 'extracted_modpacks')
-    install_modpack(filename, modpack_data)
-    input('')
+    # # Testing
+    # filename, modpack_data = extract_modpack('modpacks/test.mrpack', 'extracted_modpacks')
+    # install_modpack(filename, modpack_data)
+    # input('')
+    pass
