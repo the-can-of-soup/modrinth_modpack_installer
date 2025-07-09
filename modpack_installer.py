@@ -241,6 +241,8 @@ def install_modpack(extracted_modpack_filename: str, data: dict, wait_for_user: 
 
     # Get installation path and name
     escaped_output_name: str = escape_filename(f'{data["name"]}_{data["versionId"]}', strict=True)
+    # Maybe do something like this in the future?
+    # escaped_output_name = f'{escaped_output_name[:60]}_{random.randbytes(16).hex()}'
     install_path: str = os.path.join(INSTALLATIONS_DIR, escaped_output_name)
     profile_name: str = f'{data["name"]} - {data["versionId"]}'
 
