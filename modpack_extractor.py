@@ -281,7 +281,7 @@ def install_modpack(extracted_modpack_filename: str, data: dict, wait_for_user: 
     print('')
 
     # Get installation version from user
-    profile_version: str = ''
+    profile_version: str
     while True:
         profile_version = input('Please enter the exact name of the version: ')
 
