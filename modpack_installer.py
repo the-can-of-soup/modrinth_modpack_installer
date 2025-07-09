@@ -245,7 +245,8 @@ def extract_modpack(filename: str, destination_folder: str = '.', is_server: boo
             raise ModpackExtractorError('All provided download URLs failed! Check your internet connection.')
 
     # Get output paths
-    escaped_output_name: str = escape_filename(f'{modpack_name} - {modpack_version}')
+    server_suffix: str = ' - Server' if is_server else ''
+    escaped_output_name: str = escape_filename(f'{modpack_name} - {modpack_version}{server_suffix}')
     output_filename: str = os.path.join(destination_folder, escaped_output_name + '.zip')
 
     # Write output zip file
