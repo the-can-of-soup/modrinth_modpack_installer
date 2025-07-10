@@ -404,6 +404,7 @@ def install_modpack(extracted_modpack_filename: str, data: dict, wait_for_user: 
     # Show success message
     if print_logs:
         print(f'Successfully installed as "{profile_name}"!')
+        print('You will need to restart the Minecraft Launcher if it was open.')
 
 
 
