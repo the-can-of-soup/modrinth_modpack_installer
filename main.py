@@ -1,3 +1,5 @@
+# GitHub: https://github.com/the-can-of-soup/modrinth_modpack_installer
+
 # IMPORTS
 
 from typing import Optional, Callable
