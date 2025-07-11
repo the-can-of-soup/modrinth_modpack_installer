@@ -1,6 +1,6 @@
 # Soup's Modrinth Modpack Installer
 
-A Python program to convert Modrinth pack files (`*.mrpack`) into playable Minecraft instances.
+A Python program to convert Modrinth modpack (`*.mrpack`) files into playable Minecraft instances.
 
 ## How To Use
 
